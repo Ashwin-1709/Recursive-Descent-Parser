@@ -1,0 +1,9 @@
+int a,b,i;
+a=10;
+for(i=2; a > i; i=i+1)
+{
+a=a+i;
+b=b*i;
+};
+write a;
+write b;
