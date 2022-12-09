@@ -247,7 +247,7 @@ struct Node* parseProgram()
     if (strcmp(tokens[cur_pos], ";")==0)
     {
         cur_pos++;
-        parseProgram();
+        return parseProgram();
     }
 
     struct Node* P = (struct Node*)(malloc(sizeof(struct Node)));
