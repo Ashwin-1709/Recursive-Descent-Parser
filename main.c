@@ -113,6 +113,20 @@ struct Node* createNode()
     return (struct Node*)(malloc(sizeof(struct Node)));
 }
 
+void printTree(struct Node* root)
+{
+    printf("%s ", root->val);
+    int c = root->child_cnt;
+
+    if (c == 0)
+        return;
+
+    printf("[ ");
+    for (int i=0;i<c;i++)
+        printTree(root->child[i]);
+    printf("] ");
+}
+
 // all identifier functions are defined here
 
 bool isDeclaration()
@@ -252,5 +266,7 @@ int main(int argc, char** argv) {
     end_pos = tokenize(argv[1]);
     cur_pos = 0;
 
+    struct Node* root = parseProgram();
+    printTree(root);
     return EXIT_SUCCESS;
 }
