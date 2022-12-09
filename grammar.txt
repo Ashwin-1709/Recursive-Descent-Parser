@@ -1,7 +1,3 @@
-
-#keyword
-K -> for | read | int | write 
-
 #character
 C -> a | b | c | ... z
 
@@ -38,13 +34,13 @@ T3 -> (E) | I | N
 A -> I = E
 
 #for loop
-F -> for(E | A;E;A | E){S}
+F -> for(E|A; E; A|E){S}
 
 #program
-P -> DS | S
+P -> D;S | S
 
 #statements
-S -> A | R | W | F | AS | RS | WS | FS 
+S -> A; | R; | W; | F; | A;S | R;S | W;S | F;S 
  
 
 
