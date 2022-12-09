@@ -87,10 +87,6 @@ int tokenize(char *filename) {
         }
     }  
 
-    printf("Tokens: \n");
-    for (int i = 0 ; i < cur_pos ; i++)
-        printf("%s " , tokens[i]);   
-
     return cur_pos;  
 }
 
@@ -99,7 +95,9 @@ void addChild(struct Node* par, struct Node* ch)
     if (ch==NULL)
         return;
 
-    par->child[par->child_cnt++] = ch; 
+    int c = par->child_cnt++;
+    struct Node** p = par->child;
+    p[c] = ch;
 }
 
 void error()
@@ -121,10 +119,10 @@ void printTree(struct Node* root)
     if (c == 0)
         return;
 
-    printf("[ ");
+    printf("[");
     for (int i=0;i<c;i++)
         printTree(root->child[i]);
-    printf("] ");
+    printf("]");
 }
 
 // all identifier functions are defined here
@@ -153,7 +151,15 @@ bool isVariable()
     if (strcmp(v,"write")==0)
         return false;
 
-    return isalpha(v);
+    int l = strlen(v);
+    
+    for (int i=0;i<l;i++)
+    {
+        if (v[i]<'a' || v[i]>'z')   
+            return false;
+    }
+
+    return true;
 }
 
 // all parser functions are defined here
@@ -174,6 +180,8 @@ struct Node* parseVariable(int spos)
         return NULL;
 
     struct Node* I = (struct Node*)(malloc(sizeof(struct Node)));
+    strcpy(I->val,"I");
+
     struct Node* C = (struct Node*)(malloc(sizeof(struct Node)));
     strcpy(C->val, "C");
 
@@ -189,9 +197,13 @@ struct Node* parseVariable(int spos)
 struct Node* parseVariableList()
 {
     struct Node* L = (struct Node*)(malloc(sizeof(struct Node)));
+    strcpy(L->val,"L");
 
     if (isVariable())
+    {
         addChild(L, parseVariable(0));
+        cur_pos++;
+    }
     else {
         error();
         return NULL;
@@ -205,7 +217,7 @@ struct Node* parseVariableList()
         return L;
     }
     else if (strcmp(tokens[cur_pos],";")==0)
-        return NULL;
+        return L;
     else
     {
         error();
@@ -216,6 +228,8 @@ struct Node* parseVariableList()
 struct Node* parseDeclaration()
 {
     struct Node* D= (struct Node*)(malloc(sizeof(struct Node)));
+    strcpy(D->val, "D");
+
     addChild(D, parseTerminal());
     addChild(D, parseVariableList());
     return D;
@@ -240,7 +254,9 @@ struct Node* parseProgram()
     strcpy(P->val, "P");
 
     if (isDeclaration())
+    {
         addChild(P, parseDeclaration());
+    }
 
     if (strcmp(tokens[cur_pos],";")==0)
         addChild(P, parseTerminal());
@@ -262,11 +278,16 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    printf("%d" , tokenize(argv[1]));
     end_pos = tokenize(argv[1]);
+
+    for (int i=0;i<end_pos;i++)
+        printf("%s\n",tokens[i]);
+
     cur_pos = 0;
 
     struct Node* root = parseProgram();
     printTree(root);
+    printf("\n");
+
     return EXIT_SUCCESS;
 }
