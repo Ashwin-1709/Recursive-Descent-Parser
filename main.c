@@ -32,7 +32,7 @@ int charCheck(char c) {
 
 char operators[6] = {'+' , '-' , '*' , '/' , '>' , '='};
 
-void tokenize(char *filename) {
+int tokenize(char *filename) {
     FILE* in_file = fopen(filename , "r");
     char line[MAX_LINE_LENGTH];
     while (fgets(line, MAX_LINE_LENGTH, in_file)) {
@@ -81,7 +81,9 @@ void tokenize(char *filename) {
 
     printf("Tokens: \n");
     for (int i = 0 ; i < cur_pos ; i++)
-        printf("%s " , tokens[i]);     
+        printf("%s " , tokens[i]);   
+
+    return cur_pos;  
 }
 
 int main(int argc, char** argv) {
@@ -91,7 +93,7 @@ int main(int argc, char** argv) {
         exit(EXIT_FAILURE);
     }
 
-    tokenize(argv[1]);
+    printf("%d" , tokenize(argv[1]));
 
     return EXIT_SUCCESS;
 }
