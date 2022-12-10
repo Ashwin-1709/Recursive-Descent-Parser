@@ -178,32 +178,16 @@ Node *parseTerminal() {
     return t;
 }
 
-Node *parseVariable(int spos) {
-    char *s = tokens[cur_pos];
-    int l = strlen(s);
-    
-    if (spos == l) {
-        cur_pos++;
-        return NULL;
-    }
+Node *parseVariable() {
 
     Node *I = createNode();
     strcpy(I->val, "I");
-
-    Node *C = createNode();
-    strcpy(C->val, "C");
-
-    Node *t = createNode();
-    t->val[0] = s[spos];
-
-    addChild(C, t);
-    addChild(I, C);
-    addChild(I, parseVariable(spos + 1));
+    addChild(I, parseTerminal());
     return I;
 }
 
 Node *parseVariableList() {
-    Node *L = (Node *)(malloc(sizeof(Node)));
+    Node *L = createNode();
     strcpy(L->val, "L");
 
     if (isVariable()) {
@@ -218,7 +202,7 @@ Node *parseVariableList() {
             variables[var_pos] = tokens[cur_pos];
             variable_values[var_pos] = 0;
             var_pos++;
-            addChild(L, parseVariable(0));
+            addChild(L, parseVariable());
         }
         else {
             error();
@@ -243,7 +227,7 @@ Node *parseVariableList() {
 }
 
 Node *parseDeclaration() {
-    Node *D = (Node *)(malloc(sizeof(Node)));
+    Node *D = createNode();
     strcpy(D->val, "D");
 
     addChild(D, parseTerminal());
@@ -264,7 +248,7 @@ Node *parseProgram() {
         return parseProgram();
     }
 
-    Node *P = (Node *)(malloc(sizeof(Node)));
+    Node *P = createNode();
     strcpy(P->val, "P");
 
     if (isDeclaration()) {
@@ -278,12 +262,11 @@ Node *parseProgram() {
         return NULL;
     }
 
-    addChild(P, parseProgram());
+    addChild(P, parseProgram());  
     return P;
 }
 
 Node *parseT3() {
-    printf("T3 entered\n");
     Node *T3 = createNode();
     strcpy(T3->val, "T3");
     if (strcmp(tokens[cur_pos], "(") == 0) {
@@ -291,7 +274,7 @@ Node *parseT3() {
         addChild(T3, parseExpression());
         addChild(T3, parseTerminal());
     } else if (isVariable()) {
-        addChild(T3, parseVariable(0));
+        addChild(T3, parseVariable());
     } else if (isConstant()) {         // parse number condition
         addChild(T3, parseTerminal()); // Parse number here
     } else {
@@ -302,7 +285,6 @@ Node *parseT3() {
 }
 
 Node *parseT2() {
-    printf("T2 entered\n");
     Node *T2 = createNode();
     strcpy(T2->val, "T2");
     addChild(T2 , parseT3());
@@ -328,7 +310,6 @@ Node *parseT1() {
 }
 
 Node *parseExpression() {
-    printf("E entered\n");
     Node *E = createNode();
     strcpy(E->val, "E");
     addChild(E, parseT1());
@@ -388,20 +369,8 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
 
-    Node *root = parseExpression();
-    printf("done parsing\n");
-    // printf("%d\n", getVariableValue("ashwin"));
-    // printf("%d\n", getVariableValue("ashwini"));
-    // updateVariableValue("sriram", 50);
-    // updateVariableValue("chinmay", 100);
-    // updateVariableValue("arki", 200);
-    // for (int i = 0; i < var_pos; i++)
-    // {
-    //     printf("%s %d\n", variables[i], variable_values[i]);
-    // }
-
+    //Node *root = parseExpression();
+    Node* root = parseProgram();
     printTree(root);
-    printf("done printing\n");
-
     return EXIT_SUCCESS;
 }
