@@ -178,7 +178,7 @@ Node *parseTerminal() {
     return t;
 }
 
-Node *parseVariable(int spos) {
+Node *parseVariable() {
 
     Node *I = createNode();
     strcpy(I->val, "I");
@@ -202,7 +202,7 @@ Node *parseVariableList() {
             variables[var_pos] = tokens[cur_pos];
             variable_values[var_pos] = 0;
             var_pos++;
-            addChild(L, parseVariable(0));
+            addChild(L, parseVariable());
         }
         else {
             error();
@@ -275,7 +275,7 @@ Node *parseT3() {
         addChild(T3, parseExpression());
         addChild(T3, parseTerminal());
     } else if (isVariable()) {
-        addChild(T3, parseVariable(0));
+        addChild(T3, parseVariable());
     } else if (isConstant()) {         // parse number condition
         addChild(T3, parseTerminal()); // Parse number here
     } else {
