@@ -321,6 +321,64 @@ Node *parseExpression() {
     return E;
 }
 
+Node *parseAssignment() {
+    printf("A entered\n");
+    Node *A = createNode();
+    strcpy(A->val, "A");
+    addChild(A, parseVariable());
+    if ((strcmp(tokens[cur_pos], "=") == 0)) {
+        addChild(A, parseTerminal());
+        addChild(A, parseExpression());
+    } else {
+        error();
+        return NULL;
+    }
+    return A;
+}
+
+
+Node *parseRead() {
+    printf("R entered\n");
+    Node *R = createNode();
+    strcpy(R->val, "R");
+    if ((strcmp(tokens[cur_pos], "read")==0)) {
+        addChild(R, parseTerminal());
+        if (isVariable()){
+            addChild(R, parseVariable());
+        } else {
+            error();
+            return NULL;
+        }
+    } else {
+        error();
+        return NULL;
+    }
+    return R;
+}
+
+Node *parseWrite() {
+    printf("W entered\n");
+    Node *W = createNode();
+    strcpy(W->val, "W");
+    if ((strcmp(tokens[cur_pos], "write")==0)) {
+        addChild(W, parseTerminal());
+        if (isVariable()){
+            addChild(W, parseVariable());
+        } else if (isConstant()) {
+            addChild(W, parseTerminal());
+        }
+        else {
+            error();
+            return NULL;
+        }
+    } else {
+        error();
+        return NULL;
+    }
+    return W;
+}
+
+
 // Symbol table functions
 
 int getVariablePosition(char* v) {
