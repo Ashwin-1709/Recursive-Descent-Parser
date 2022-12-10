@@ -17,6 +17,19 @@ typedef struct Node {
     struct Node *child[15];
 } Node;
 
+bool isConstant() {
+    char *token = tokens[cur_pos];
+    for (int i = 0; i < 50; i++) {
+        if (token[i] == 0)
+            break;
+        if (!isdigit(token[i]))
+            return false;
+    }
+    return true;
+}
+
+Node *parseExpression();
+
 /**
 Reads the passed input file line by line.
 Removes all space type characters from the lines, including \n (Carriage
@@ -102,9 +115,7 @@ void error() {
     exit(EXIT_FAILURE);
 }
 
-Node *createNode() {
-    return (Node *)(malloc(sizeof(Node)));
-}
+Node *createNode() { return (Node *)(malloc(sizeof(Node))); }
 
 void printTree(Node *root) {
     printf("%s ", root->val);
@@ -247,6 +258,67 @@ Node *parseProgram() {
 
     addChild(P, parseProgram());
     return P;
+}
+
+Node *parseT3() {
+    Node *T3 = (Node *)(malloc(sizeof(Node)));
+    strcpy(T3->val, "T3");
+    if (strcmp(tokens[cur_pos], "(") == 0) {
+        addChild(T3, parseTerminal());
+        addChild(T3, parseExpression());
+        addChild(T3, parseTerminal());
+    } else if (isVariable()) {
+        addChild(T3, parseVariable(0));
+    } else if (isConstant()) {         // parse number condition
+        addChild(T3, parseTerminal()); // Parse number here
+    } else {
+        error();
+        return NULL;
+    }
+    return T3;
+}
+
+Node *parseT2() {
+    Node *T2 = (Node *)(malloc(sizeof(Node)));
+    strcpy(T2->val, "T2");
+    if ((strcmp(tokens[cur_pos + 1], "*") == 0) ||
+        (strcmp(tokens[cur_pos + 1], "/") == 0)) {
+        addChild(T2, parseT3());
+        addChild(T2, parseTerminal());
+        addChild(T2, parseT2());
+    } else {
+        addChild(T2, parseT3());
+    }
+    return T2;
+}
+
+Node *parseT1() {
+    // Parse T3 will handle offset to next expression or terminal
+    Node *T1 = (Node *)(malloc(sizeof(Node)));
+    strcpy(T1->val, "T1");
+    if ((strcmp(tokens[cur_pos + 1], "+") == 0) ||
+        (strcmp(tokens[cur_pos + 1], "-") == 0)) {
+        addChild(T1, parseT2());
+        addChild(T1, parseTerminal());
+        addChild(T1, parseT1());
+    } else {
+        addChild(T1, parseT2());
+    }
+    return T1;
+}
+
+Node *parseExpression() {
+    Node *E = (Node *)(malloc(sizeof(Node)));
+    strcpy(E->val, "E");
+    if ((strcmp(tokens[cur_pos + 1], ">") == 0) ||
+        (strcmp(tokens[cur_pos + 1], "==") == 0)) {
+        addChild(E, parseT1());
+        addChild(E, parseTerminal());
+        addChild(E, parseExpression());
+    } else {
+        addChild(E, parseT1());
+    }
+    return E;
 }
 
 int main(int argc, char **argv) {
