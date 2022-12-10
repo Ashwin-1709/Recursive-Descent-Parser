@@ -7,17 +7,15 @@
 
 #define MAX_TOKENS (1000000)
 #define MAX_LINE_LENGTH (1000000)
-#define EXIT_SUCCESS 0
 
 char tokens[100000][50];
 int cur_pos = 0, token_pos = 0, end_pos = 0;
 
-struct Node {
-
+typedef struct Node {
     char val[50];
     int child_cnt;
     struct Node *child[15];
-};
+} Node;
 
 /**
 Reads the passed input file line by line.
@@ -90,12 +88,12 @@ int tokenize(char *filename) {
     return cur_pos;
 }
 
-void addChild(struct Node *par, struct Node *ch) {
+void addChild(Node *par, Node *ch) {
     if (ch == NULL)
         return;
 
     int c = par->child_cnt++;
-    struct Node **p = par->child;
+    Node **p = par->child;
     p[c] = ch;
 }
 
@@ -104,11 +102,11 @@ void error() {
     exit(EXIT_FAILURE);
 }
 
-struct Node *createNode() {
-    return (struct Node *)(malloc(sizeof(struct Node)));
+Node *createNode() {
+    return (Node *)(malloc(sizeof(Node)));
 }
 
-void printTree(struct Node *root) {
+void printTree(Node *root) {
     printf("%s ", root->val);
     int c = root->child_cnt;
 
@@ -157,13 +155,13 @@ bool isVariable() {
 
 // all parser functions are defined here
 
-struct Node *parseTerminal() {
-    struct Node *t = (struct Node *)(malloc(sizeof(struct Node)));
+Node *parseTerminal() {
+    Node *t = (Node *)(malloc(sizeof(Node)));
     strcpy(t->val, tokens[cur_pos++]);
     return t;
 }
 
-struct Node *parseVariable(int spos) {
+Node *parseVariable(int spos) {
     char *s = tokens[cur_pos];
     int l = strlen(s);
 
@@ -171,13 +169,13 @@ struct Node *parseVariable(int spos) {
         return NULL;
     }
 
-    struct Node *I = (struct Node *)(malloc(sizeof(struct Node)));
+    Node *I = (Node *)(malloc(sizeof(Node)));
     strcpy(I->val, "I");
 
-    struct Node *C = (struct Node *)(malloc(sizeof(struct Node)));
+    Node *C = (Node *)(malloc(sizeof(Node)));
     strcpy(C->val, "C");
 
-    struct Node *t = createNode();
+    Node *t = createNode();
     t->val[0] = s[spos];
 
     addChild(C, t);
@@ -186,8 +184,8 @@ struct Node *parseVariable(int spos) {
     return I;
 }
 
-struct Node *parseVariableList() {
-    struct Node *L = (struct Node *)(malloc(sizeof(struct Node)));
+Node *parseVariableList() {
+    Node *L = (Node *)(malloc(sizeof(Node)));
     strcpy(L->val, "L");
 
     if (isVariable()) {
@@ -200,7 +198,7 @@ struct Node *parseVariableList() {
 
     if (strcmp(tokens[cur_pos], ",") == 0) {
         addChild(L, parseTerminal());
-        struct Node *x = parseVariableList();
+        Node *x = parseVariableList();
         addChild(L, x);
         return L;
     } else if (strcmp(tokens[cur_pos], ";") == 0)
@@ -211,8 +209,8 @@ struct Node *parseVariableList() {
     }
 }
 
-struct Node *parseDeclaration() {
-    struct Node *D = (struct Node *)(malloc(sizeof(struct Node)));
+Node *parseDeclaration() {
+    Node *D = (Node *)(malloc(sizeof(Node)));
     strcpy(D->val, "D");
 
     addChild(D, parseTerminal());
@@ -220,7 +218,7 @@ struct Node *parseDeclaration() {
     return D;
 }
 
-struct Node *parseProgram() {
+Node *parseProgram() {
     // end of program
 
     if (cur_pos == end_pos)
@@ -233,7 +231,7 @@ struct Node *parseProgram() {
         return parseProgram();
     }
 
-    struct Node *P = (struct Node *)(malloc(sizeof(struct Node)));
+    Node *P = (Node *)(malloc(sizeof(Node)));
     strcpy(P->val, "P");
 
     if (isDeclaration()) {
@@ -266,7 +264,7 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
 
-    struct Node *root = parseProgram();
+    Node *root = parseProgram();
     printTree(root);
     printf("\n");
 
