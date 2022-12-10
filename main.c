@@ -203,7 +203,7 @@ Node *parseVariable(int spos) {
 }
 
 Node *parseVariableList() {
-    Node *L = (Node *)(malloc(sizeof(Node)));
+    Node *L = createNode();
     strcpy(L->val, "L");
 
     if (isVariable()) {
@@ -243,7 +243,7 @@ Node *parseVariableList() {
 }
 
 Node *parseDeclaration() {
-    Node *D = (Node *)(malloc(sizeof(Node)));
+    Node *D = createNode();
     strcpy(D->val, "D");
 
     addChild(D, parseTerminal());
@@ -264,7 +264,7 @@ Node *parseProgram() {
         return parseProgram();
     }
 
-    Node *P = (Node *)(malloc(sizeof(Node)));
+    Node *P = createNode();
     strcpy(P->val, "P");
 
     if (isDeclaration()) {
