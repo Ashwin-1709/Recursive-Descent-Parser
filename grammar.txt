@@ -1,9 +1,6 @@
 #character
 C -> a | b | c | ... z
 
-#variable
-I -> C | CI
-
 #variable list
 L -> I | I,L
 

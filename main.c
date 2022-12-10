@@ -179,26 +179,10 @@ Node *parseTerminal() {
 }
 
 Node *parseVariable(int spos) {
-    char *s = tokens[cur_pos];
-    int l = strlen(s);
-    
-    if (spos == l) {
-        cur_pos++;
-        return NULL;
-    }
 
     Node *I = createNode();
     strcpy(I->val, "I");
-
-    Node *C = createNode();
-    strcpy(C->val, "C");
-
-    Node *t = createNode();
-    t->val[0] = s[spos];
-
-    addChild(C, t);
-    addChild(I, C);
-    addChild(I, parseVariable(spos + 1));
+    addChild(I, parseTerminal());
     return I;
 }
 
@@ -278,7 +262,7 @@ Node *parseProgram() {
         return NULL;
     }
 
-    addChild(P, parseProgram());
+    addChild(P, parseProgram());  
     return P;
 }
 
