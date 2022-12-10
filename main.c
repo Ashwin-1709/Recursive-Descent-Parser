@@ -105,7 +105,7 @@ int tokenize(char *filename) {
 
 void addChild(Node *par, Node *ch) {
     if (ch == NULL)
-        return;
+        return;        
 
     int c = par->child_cnt++;
     Node **p = par->child;
@@ -117,7 +117,13 @@ void error() {
     exit(EXIT_FAILURE);
 }
 
-Node *createNode() { return (Node *)(malloc(sizeof(Node))); }
+Node *createNode() { 
+    Node* new_node = (Node *)(malloc(sizeof(Node))); 
+    new_node->child_cnt = 0;
+    for(int i = 0 ; i < 50 ; i++)
+        new_node->val[i] = 0;
+    return new_node;
+}
 
 void printTree(struct Node* root)
 {
@@ -167,7 +173,7 @@ bool isVariable() {
 // all parser functions are defined here
 
 Node *parseTerminal() {
-    Node *t = (Node *)(malloc(sizeof(Node)));
+    Node *t = createNode();
     strcpy(t->val, tokens[cur_pos++]);
     return t;
 }
@@ -175,15 +181,16 @@ Node *parseTerminal() {
 Node *parseVariable(int spos) {
     char *s = tokens[cur_pos];
     int l = strlen(s);
-
+    
     if (spos == l) {
+        cur_pos++;
         return NULL;
     }
 
-    Node *I = (Node *)(malloc(sizeof(Node)));
+    Node *I = createNode();
     strcpy(I->val, "I");
 
-    Node *C = (Node *)(malloc(sizeof(Node)));
+    Node *C = createNode();
     strcpy(C->val, "C");
 
     Node *t = createNode();
@@ -212,7 +219,6 @@ Node *parseVariableList() {
             variable_values[var_pos] = 0;
             var_pos++;
             addChild(L, parseVariable(0));
-            cur_pos++;
         }
         else {
             error();
@@ -277,7 +283,8 @@ Node *parseProgram() {
 }
 
 Node *parseT3() {
-    Node *T3 = (Node *)(malloc(sizeof(Node)));
+    printf("T3 entered\n");
+    Node *T3 = createNode();
     strcpy(T3->val, "T3");
     if (strcmp(tokens[cur_pos], "(") == 0) {
         addChild(T3, parseTerminal());
@@ -295,45 +302,41 @@ Node *parseT3() {
 }
 
 Node *parseT2() {
-    Node *T2 = (Node *)(malloc(sizeof(Node)));
+    printf("T2 entered\n");
+    Node *T2 = createNode();
     strcpy(T2->val, "T2");
-    if ((strcmp(tokens[cur_pos + 1], "*") == 0) ||
-        (strcmp(tokens[cur_pos + 1], "/") == 0)) {
-        addChild(T2, parseT3());
+    addChild(T2 , parseT3());
+    if ((strcmp(tokens[cur_pos], "*") == 0) ||
+        (strcmp(tokens[cur_pos], "/") == 0)) {
         addChild(T2, parseTerminal());
         addChild(T2, parseT2());
-    } else {
-        addChild(T2, parseT3());
-    }
+    } 
     return T2;
 }
 
 Node *parseT1() {
     // Parse T3 will handle offset to next expression or terminal
-    Node *T1 = (Node *)(malloc(sizeof(Node)));
+    Node *T1 = createNode();
     strcpy(T1->val, "T1");
-    if ((strcmp(tokens[cur_pos + 1], "+") == 0) ||
-        (strcmp(tokens[cur_pos + 1], "-") == 0)) {
-        addChild(T1, parseT2());
+    addChild(T1 , parseT2());
+    if ((strcmp(tokens[cur_pos], "+") == 0) ||
+        (strcmp(tokens[cur_pos], "-") == 0)) {
         addChild(T1, parseTerminal());
         addChild(T1, parseT1());
-    } else {
-        addChild(T1, parseT2());
-    }
+    } 
     return T1;
 }
 
 Node *parseExpression() {
-    Node *E = (Node *)(malloc(sizeof(Node)));
+    printf("E entered\n");
+    Node *E = createNode();
     strcpy(E->val, "E");
-    if ((strcmp(tokens[cur_pos + 1], ">") == 0) ||
-        (strcmp(tokens[cur_pos + 1], "==") == 0)) {
-        addChild(E, parseT1());
+    addChild(E, parseT1());
+    if ((strcmp(tokens[cur_pos], ">") == 0) ||
+        (strcmp(tokens[cur_pos], "==") == 0)) {
         addChild(E, parseTerminal());
         addChild(E, parseExpression());
-    } else {
-        addChild(E, parseT1());
-    }
+    } 
     return E;
 }
 
@@ -385,20 +388,20 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
 
-    Node *root = parseProgram();
-
-    printf("%d\n", getVariableValue("ashwin"));
-    printf("%d\n", getVariableValue("ashwini"));
-    updateVariableValue("sriram", 50);
-    updateVariableValue("chinmay", 100);
-    updateVariableValue("arki", 200);
-    for (int i = 0; i < var_pos; i++)
-    {
-        printf("%s %d\n", variables[i], variable_values[i]);
-    }
+    Node *root = parseExpression();
+    printf("done parsing\n");
+    // printf("%d\n", getVariableValue("ashwin"));
+    // printf("%d\n", getVariableValue("ashwini"));
+    // updateVariableValue("sriram", 50);
+    // updateVariableValue("chinmay", 100);
+    // updateVariableValue("arki", 200);
+    // for (int i = 0; i < var_pos; i++)
+    // {
+    //     printf("%s %d\n", variables[i], variable_values[i]);
+    // }
 
     printTree(root);
-    printf("\n");
+    printf("done printing\n");
 
     return EXIT_SUCCESS;
 }
