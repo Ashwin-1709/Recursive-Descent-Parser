@@ -267,7 +267,6 @@ Node *parseProgram() {
 }
 
 Node *parseT3() {
-    printf("T3 entered\n");
     Node *T3 = createNode();
     strcpy(T3->val, "T3");
     if (strcmp(tokens[cur_pos], "(") == 0) {
@@ -286,7 +285,6 @@ Node *parseT3() {
 }
 
 Node *parseT2() {
-    printf("T2 entered\n");
     Node *T2 = createNode();
     strcpy(T2->val, "T2");
     addChild(T2 , parseT3());
@@ -312,7 +310,6 @@ Node *parseT1() {
 }
 
 Node *parseExpression() {
-    printf("E entered\n");
     Node *E = createNode();
     strcpy(E->val, "E");
     addChild(E, parseT1());
@@ -372,20 +369,8 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
 
-    Node *root = parseExpression();
-    printf("done parsing\n");
-    // printf("%d\n", getVariableValue("ashwin"));
-    // printf("%d\n", getVariableValue("ashwini"));
-    // updateVariableValue("sriram", 50);
-    // updateVariableValue("chinmay", 100);
-    // updateVariableValue("arki", 200);
-    // for (int i = 0; i < var_pos; i++)
-    // {
-    //     printf("%s %d\n", variables[i], variable_values[i]);
-    // }
-
+    //Node *root = parseExpression();
+    Node* root = parseProgram();
     printTree(root);
-    printf("done printing\n");
-
     return EXIT_SUCCESS;
 }
