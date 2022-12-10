@@ -31,6 +31,10 @@ bool isConstant() {
 }
 
 Node *parseExpression();
+Node *parseStatement();
+Node *parseRead();
+Node *parseWrite();
+Node *parseAssignment();
 
 /**
 Reads the passed input file line by line.
@@ -260,8 +264,43 @@ Node *parseProgram() {
         return NULL;
     }
 
-    addChild(P, parseProgram());
+    addChild(P, parseStatement());
     return P;
+}
+
+Node *parseStatement() {
+    // end of program
+
+    if (cur_pos == end_pos)
+        return NULL;
+
+    // ignore empty statements
+
+    if (strcmp(tokens[cur_pos], ";") == 0) {
+        cur_pos++;
+        return parseStatement();
+    }
+
+    Node *S = createNode();
+    strcpy(S->val, "S");
+    if (strcmp(tokens[cur_pos], "read") == 0) {
+        addChild(S, parseRead());
+    } else if (strcmp(tokens[cur_pos], "write") == 0) {
+        addChild(S, parseWrite());
+    } else if (strcmp(tokens[cur_pos + 1], "=") == 0) {
+        addChild(S, parseAssignment());
+    } else {
+        error();
+        return NULL;
+    }
+    if (strcmp(tokens[cur_pos], ";") == 0)
+        addChild(S, parseTerminal());
+    else {
+        error();
+        return NULL;
+    }
+    addChild(S, parseStatement());
+    return S;
 }
 
 Node *parseT3() {
@@ -420,7 +459,6 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
 
-    // Node *root = parseExpression();
     Node *root = parseProgram();
     printTree(root);
     return EXIT_SUCCESS;

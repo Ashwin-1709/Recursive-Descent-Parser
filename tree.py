@@ -1,7 +1,8 @@
 from nltk.tree import *
+import sys
 
 # assign your output (generalied list of the syntax tree) to varaible text
-text = "[P [D [int ][L [I [C [a ]][I [C [r ]][I [C [k ]][I [C [i ]]]]]][, ][L [I [C [a ]][I [C [s ]][I [C [h ]]]]][, ][L [I [C [s ]][I [C [r ]][I [C [i ]]]]]]]]][; ]]"
+text = sys.argv[1]
 
 
 text = text.replace("(", "ob")    #in the syntax tree, 'ob' will display in place of '('
