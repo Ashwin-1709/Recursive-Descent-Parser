@@ -106,16 +106,14 @@ Node *createNode() {
     return (Node *)(malloc(sizeof(Node)));
 }
 
-void printTree(Node *root) {
-    printf("%s ", root->val);
+void printTree(struct Node* root)
+{
+    printf("[%s ", root->val);
     int c = root->child_cnt;
 
-    if (c == 0)
-        return;
-
-    printf("[");
-    for (int i = 0; i < c; i++)
+    for (int i=0;i<c;i++)
         printTree(root->child[i]);
+        
     printf("]");
 }
 
