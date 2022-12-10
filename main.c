@@ -9,7 +9,9 @@
 #define MAX_LINE_LENGTH (1000000)
 
 char tokens[100000][50];
-int cur_pos = 0, token_pos = 0, end_pos = 0;
+char* variables[100000];
+int variable_values[100000];
+int cur_pos = 0, token_pos = 0, end_pos = 0, var_pos = 0;
 
 typedef struct Node {
     char val[50];
@@ -198,8 +200,24 @@ Node *parseVariableList() {
     strcpy(L->val, "L");
 
     if (isVariable()) {
-        addChild(L, parseVariable(0));
-        cur_pos++;
+        bool exists = false;
+        for (int i = 0; i < var_pos; i++) {
+            if (!strcmp(variables[i], tokens[cur_pos])) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            variables[var_pos] = tokens[cur_pos];
+            variable_values[var_pos] = 0;
+            var_pos++;
+            addChild(L, parseVariable(0));
+            cur_pos++;
+        }
+        else {
+            error();
+            return NULL;
+        }
     } else {
         error();
         return NULL;
@@ -319,6 +337,39 @@ Node *parseExpression() {
     return E;
 }
 
+// Symbol table functions
+
+int getVariablePosition(char* v) {
+    int pos=-1;
+    for (int i = 0; i < var_pos; i++)
+    {
+        if (!strcmp(variables[i], v))
+        {
+            pos=i;
+            break;
+        }
+    }
+    return pos;
+}
+
+int getVariableValue(char* v) {
+    int pos = getVariablePosition(v);
+    if (pos == -1) return -1;
+    return variable_values[pos];
+}
+
+void updateVariableValue(char* v, int new_val) {
+    int pos = getVariablePosition(v);
+    if (pos == -1)
+    {
+        printf("Invalid variable %s\n", v);
+        return;
+    }
+    variable_values[pos] = new_val;
+}
+
+// Main function
+
 int main(int argc, char **argv) {
 
     if (argc < 2) {
@@ -335,6 +386,17 @@ int main(int argc, char **argv) {
     cur_pos = 0;
 
     Node *root = parseProgram();
+
+    printf("%d\n", getVariableValue("ashwin"));
+    printf("%d\n", getVariableValue("ashwini"));
+    updateVariableValue("sriram", 50);
+    updateVariableValue("chinmay", 100);
+    updateVariableValue("arki", 200);
+    for (int i = 0; i < var_pos; i++)
+    {
+        printf("%s %d\n", variables[i], variable_values[i]);
+    }
+
     printTree(root);
     printf("\n");
 
