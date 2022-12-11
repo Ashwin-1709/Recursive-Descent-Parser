@@ -149,8 +149,7 @@ bool isDeclaration() {
     return false;
 }
 
-bool isVariable() {
-    char *v = tokens[cur_pos];
+bool isVariable(char *v) {
 
     if (strcmp(v, "for") == 0)
         return false;
@@ -194,7 +193,7 @@ Node *parseVariableList() {
     Node *L = createNode();
     strcpy(L->val, "L");
 
-    if (isVariable()) {
+    if (isVariable(tokens[cur_pos])) {
         bool exists = false;
         for (int i = 0; i < var_pos; i++) {
             if (!strcmp(variables[i], tokens[cur_pos])) {
@@ -314,7 +313,7 @@ Node *parseT3() {
         addChild(T3, parseTerminal());
         addChild(T3, parseExpression());
         addChild(T3, parseTerminal());
-    } else if (isVariable()) {
+    } else if (isVariable(tokens[cur_pos])) {
         addChild(T3, parseVariable());
     } else if (isConstant()) {         // parse number condition
         addChild(T3, parseTerminal()); // Parse number here
@@ -363,7 +362,6 @@ Node *parseExpression() {
 }
 
 Node *parseAssignment() {
-    printf("A entered\n");
     Node *A = createNode();
     strcpy(A->val, "A");
     addChild(A, parseVariable());
@@ -378,7 +376,6 @@ Node *parseAssignment() {
 }
 
 Node *parseForLoop() {
-    printf("F entered\n");
     Node *F = createNode();
     strcpy(F->val, "F");
     addChild(F, parseTerminal());
@@ -397,12 +394,11 @@ Node *parseForLoop() {
 }
 
 Node *parseRead() {
-    printf("R entered\n");
     Node *R = createNode();
     strcpy(R->val, "R");
     if ((strcmp(tokens[cur_pos], "read") == 0)) {
         addChild(R, parseTerminal());
-        if (isVariable()) {
+        if (isVariable(tokens[cur_pos])) {
             addChild(R, parseVariable());
         } else {
             error();
@@ -416,12 +412,11 @@ Node *parseRead() {
 }
 
 Node *parseWrite() {
-    printf("W entered\n");
     Node *W = createNode();
     strcpy(W->val, "W");
     if ((strcmp(tokens[cur_pos], "write") == 0)) {
         addChild(W, parseTerminal());
-        if (isVariable()) {
+        if (isVariable(tokens[cur_pos])) {
             addChild(W, parseVariable());
         } else if (isConstant()) {
             addChild(W, parseTerminal());
@@ -465,18 +460,30 @@ void updateVariableValue(char *v, int new_val) {
     variable_values[pos] = new_val;
 }
 
-void simulateRead(char *v) {
-    int val = getVariablePosition(v);
-    if (val == -1) {
-        printf("Variable not declared\n");
+// Simulator functions
+
+void simulateRead(Node *root) {
+    char *v = root->child[1]->child[0]->val;
+    int pos = getVariablePosition(v);
+
+    if (pos == -1) {
+        printf("Variable %s not declared\n", v);
         exit(EXIT_FAILURE);
     }
+
     int cur;
+    printf("Input for %s : ", v);
     scanf("%d", &cur);
+
+    if (cur < 0)
+        error();
+
     updateVariableValue(v, cur);
 }
 
-void simulateWrite(char *v) {
+void simulateWrite(Node *root) {
+    char *v = root->child[1]->child[0]->val;
+
     bool canWrite = true;
     for (int i = 0; i < 50; i++) {
         if (v[i] == 0)
@@ -489,14 +496,103 @@ void simulateWrite(char *v) {
     if (canWrite) {
         printf("%s\n", v);
     } else {
-        int val = getVariablePosition(v);
-        if (val == -1) {
+        int pos = getVariablePosition(v);
+        if (pos == -1) {
             printf("Variable not declared\n");
             exit(EXIT_FAILURE);
         }
-        printf("%s\n", v);
+        printf("%d\n", getVariableValue(v));
     }
 }
+
+int simulateExpression(Node *root) {
+    if ((root->child_cnt) == 0) {
+        printf("before constant : %d\n",atoi(root->val));
+        return atoi(root->val);
+    } else if ((root->child_cnt) == 1) {
+        if (strcmp(root->val, "I") == 0)
+        {
+            printf("before variable : %d\n",getVariableValue(root->child[0]->val));
+            return getVariableValue(root->child[0]->val);
+        }            
+        else
+            return simulateExpression(root->child[0]);
+    } else {
+        if (strcmp(root->child[0]->val, "(") == 0)
+            return simulateExpression(root->child[1]);
+        else {
+            int x1 = simulateExpression(root->child[0]);
+            char *op = root->child[1]->val;
+            int x2 = simulateExpression(root->child[2]);
+
+            if (strcmp(op, ">") == 0)
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 > x2);
+                return x1 > x2;
+            }
+            else if (strcmp(op, "==") == 0)
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 == x2);
+                return x1 == x2;
+            }
+            else if (strcmp(op, "+") == 0)
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 + x2);
+                return x1 + x2;
+            }
+            else if (strcmp(op, "-") == 0)
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 - x2);
+                return x1 - x2;
+            }
+            else if (strcmp(op, "*") == 0)
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 * x2);
+                return x1 * x2;
+            }
+            else 
+            {
+                printf("Evaluating %d%s%d : %d\n", x1,op,x2,x1 / x2);
+                
+                if (x2 == 0)
+                    error();
+                return x1 / x2;
+            }
+        }
+    }
+}
+
+void simulateAssignment(Node *root) {
+    char *v = root->child[0]->child[0]->val;
+    int val = simulateExpression(root->child[2]);
+    printf("exp val = %d\n", val);
+    updateVariableValue(v, val);
+}
+
+void simulateStatement(Node *root) {
+    for (int i = 0; i < (root->child_cnt); i++) {
+        Node *c = root->child[i];
+
+        if (strcmp(c->val, "S") == 0)
+            simulateStatement(c);
+        else if (strcmp(c->val, "R") == 0)
+            simulateRead(c);
+        else if (strcmp(c->val, "W") == 0)
+            simulateWrite(c);
+        else if (strcmp(c->val, "A") == 0)
+            simulateAssignment(c);
+        else if (strcmp(c->val, "F") == 0) {
+        }
+    }
+}
+
+void simulateProgram(Node *root) {
+    if ((root->child_cnt) == 1)
+        simulateStatement(root->child[0]);
+    else
+        simulateStatement(root->child[2]);
+}
+
 // Main function
 
 int main(int argc, char **argv) {
@@ -515,5 +611,7 @@ int main(int argc, char **argv) {
     cur_pos = 0;
     Node *root = parseProgram();
     printTree(root);
+    printf("\n");
+    simulateProgram(root);
     return EXIT_SUCCESS;
 }

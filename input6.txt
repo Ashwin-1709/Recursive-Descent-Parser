@@ -1,1 +1,8 @@
-(2*c + (ab - dogc*8) > 5) == 4
+int ab , cd , de;
+read cd;
+read de;
+ab = 2;
+ab = 2 * cd - de + 100 ;
+write ab;
+write cd;
+write de;
