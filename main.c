@@ -35,6 +35,7 @@ Node *parseStatement();
 Node *parseRead();
 Node *parseWrite();
 Node *parseAssignment();
+Node *parseForLoop();
 
 /**
 Reads the passed input file line by line.
@@ -117,7 +118,7 @@ void addChild(Node *par, Node *ch) {
 }
 
 void error() {
-    perror("Error occurred\n");
+    perror("Error occurred ");
     exit(EXIT_FAILURE);
 }
 
@@ -289,6 +290,8 @@ Node *parseStatement() {
         addChild(S, parseWrite());
     } else if (strcmp(tokens[cur_pos + 1], "=") == 0) {
         addChild(S, parseAssignment());
+    } else if (strcmp(tokens[cur_pos], "for") == 0) {
+        addChild(S, parseForLoop());
     } else {
         error();
         return NULL;
@@ -299,7 +302,8 @@ Node *parseStatement() {
         error();
         return NULL;
     }
-    addChild(S, parseStatement());
+    if (strcmp(tokens[cur_pos], "}") != 0)
+        addChild(S, parseStatement());
     return S;
 }
 
@@ -373,6 +377,25 @@ Node *parseAssignment() {
     return A;
 }
 
+Node *parseForLoop() {
+    printf("F entered\n");
+    Node *F = createNode();
+    strcpy(F->val, "F");
+    addChild(F, parseTerminal());
+    addChild(F, parseTerminal());
+    addChild(F, parseAssignment());
+    addChild(F, parseTerminal());
+    addChild(F, parseExpression());
+    addChild(F, parseTerminal());
+    addChild(F, parseAssignment());
+    addChild(F, parseTerminal());
+    addChild(F, parseTerminal());
+    addChild(F, parseStatement());
+    // addChild(F, parseTerminal());
+    addChild(F, parseTerminal());
+    return F;
+}
+
 Node *parseRead() {
     printf("R entered\n");
     Node *R = createNode();
@@ -444,13 +467,13 @@ void updateVariableValue(char *v, int new_val) {
 
 void simulateRead(char *v) {
     int val = getVariablePosition(v);
-    if(val == -1) {
+    if (val == -1) {
         printf("Variable not declared\n");
         exit(EXIT_FAILURE);
     }
     int cur;
-    scanf("%d" , &cur);
-    updateVariableValue(v , cur);
+    scanf("%d", &cur);
+    updateVariableValue(v, cur);
 }
 
 void simulateWrite(char *v) {
@@ -463,15 +486,15 @@ void simulateWrite(char *v) {
             break;
         }
     }
-    if(canWrite) {
-        printf("%s\n" , v);
+    if (canWrite) {
+        printf("%s\n", v);
     } else {
         int val = getVariablePosition(v);
-        if(val == -1) {
+        if (val == -1) {
             printf("Variable not declared\n");
             exit(EXIT_FAILURE);
         }
-        printf("%s\n" , v);
+        printf("%s\n", v);
     }
 }
 // Main function

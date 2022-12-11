@@ -31,7 +31,7 @@ T3 -> (E) | I | N
 A -> I = E
 
 #for loop
-F -> for(E|A; E; A|E){S}
+F -> for(A; E; A){S}
 
 #program
 P -> D;S | S
