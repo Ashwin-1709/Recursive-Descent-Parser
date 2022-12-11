@@ -442,6 +442,38 @@ void updateVariableValue(char *v, int new_val) {
     variable_values[pos] = new_val;
 }
 
+void simulateRead(char *v) {
+    int val = getVariablePosition(v);
+    if(val == -1) {
+        printf("Variable not declared\n");
+        exit(EXIT_FAILURE);
+    }
+    int cur;
+    scanf("%d" , &cur);
+    updateVariableValue(v , cur);
+}
+
+void simulateWrite(char *v) {
+    bool canWrite = true;
+    for (int i = 0; i < 50; i++) {
+        if (v[i] == 0)
+            break;
+        if (!isdigit(v[i])) {
+            canWrite = false;
+            break;
+        }
+    }
+    if(canWrite) {
+        printf("%s\n" , v);
+    } else {
+        int val = getVariablePosition(v);
+        if(val == -1) {
+            printf("Variable not declared\n");
+            exit(EXIT_FAILURE);
+        }
+        printf("%s\n" , v);
+    }
+}
 // Main function
 
 int main(int argc, char **argv) {
@@ -458,7 +490,6 @@ int main(int argc, char **argv) {
         printf("%s\n", tokens[i]);
 
     cur_pos = 0;
-
     Node *root = parseProgram();
     printTree(root);
     return EXIT_SUCCESS;
