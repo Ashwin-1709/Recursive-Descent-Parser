@@ -123,9 +123,17 @@ void addChild(Node *par, Node *ch) {
 }
 
 int get_end(int pos) {
-    int end = pos;
-    while(strcmp(tokens[end], ";") != 0)
+    int end = pos , bracket = 0;
+    while(true) {
+        if((strcmp(tokens[end] , "(")) == 0)
+            bracket++;
+        else if((strcmp(tokens[end] , ")")) == 0)
+            bracket--;
+        if(bracket < 0 || (strcmp(tokens[end] , ";") == 0))
+            return end;
         end++;
+
+    }
     return end;
 }
 void error() {
@@ -475,6 +483,7 @@ Node *parseAssignment() {
     addChild(A, parseVariable());
     if ((strcmp(tokens[cur_pos], "=") == 0)) {
         addChild(A, parseTerminal());
+        printf("end = %d\n" , get_end(cur_pos));
         addChild(A, parseExpression(cur_pos , get_end(cur_pos)));
     } else {
         error();
@@ -484,6 +493,7 @@ Node *parseAssignment() {
 }
 
 Node *parseForLoop() {
+    printf("in for loop\n");
     Node *F = createNode();
     strcpy(F->val, "F");
     addChild(F, parseTerminal());
@@ -717,12 +727,12 @@ int main(int argc, char **argv) {
     end_pos = tokenize(argv[1]);
 
     for (int i = 0; i < end_pos; i++)
-        printf("%s\n", tokens[i]);
+        printf("%d : %s\n", i , tokens[i]);
 
     cur_pos = 0;
     Node *root = parseProgram();
     printTree(root);
     printf("\n");
-    simulateProgram(root);
+    // simulateProgram(root);
     return EXIT_SUCCESS;
 }
