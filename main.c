@@ -147,7 +147,7 @@ int get_end(int pos) {
 }
 void error() {
     printf("Error parsing %d\n", cur_pos);
-    perror("Error occurred ");
+    fprintf(stderr, "Error occurred\n");
     exit(EXIT_FAILURE);
 }
 
@@ -681,8 +681,7 @@ void simulateProgram(Node *root) {
 int main(int argc, char **argv) {
 
     if (argc < 2) {
-        perror("Pass the name of the input file as the first parameter. e.g.: "
-               "./simulator input.txt");
+        fprintf(stderr, "Usage: %s <input>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
