@@ -2,7 +2,7 @@ int key, form, end;
 form=10; 
 end=20;
 key=40;
-for(form=12 ; end > front; form=form +2 )
+for(form=12 ; end > front; form=(form +2 * (1)))
 {
 key=key + form;
 };
