@@ -1,6 +1,3 @@
-#character
-C -> a | b | c | ... z
-
 #variable list
 L -> I | I,L
 
@@ -12,12 +9,6 @@ R -> read I
 
 #write
 W -> write I | write N
-
-#digit
-X -> 0 | 1 | ... 9
-
-#Numeric constant
-N -> X | XN
 
 #expression
 -----------------------------
@@ -39,5 +30,4 @@ P -> D;S | S
 #statements
 S -> A; | R; | W; | F; | A;S | R;S | W;S | F;S 
  
-
 
