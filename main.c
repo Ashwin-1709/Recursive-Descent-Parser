@@ -51,6 +51,7 @@ void simulateFor(Node *root);
 void simulateStatement(Node *root);
 void simulateProgram(Node *root);
 int get_end(int pos);
+void error(char *msg);
 
 /**
 Reads the passed input file line by line.
@@ -135,15 +136,19 @@ void addChild(Node *par, Node *ch) {
 int get_end(int pos) {
     int end = pos, bracket = 0;
     while (true) {
+
+        if (end == end_pos) {
+            error("Not a well formed expression");
+        }
+
         if ((strcmp(tokens[end], "(")) == 0)
             bracket++;
         else if ((strcmp(tokens[end], ")")) == 0)
             bracket--;
-        if (bracket < 0 || (strcmp(tokens[end], ";") == 0))
-            return end;
+        if ((bracket < 0) || (strcmp(tokens[end], ";") == 0))
+            return end - 1;
         end++;
     }
-    return end;
 }
 
 void error(char* msg) {
