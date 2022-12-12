@@ -1,0 +1,16 @@
+int i,j,k;
+
+for (i=0;2>i;i=i+1) 
+{
+    write i;
+
+    for (j=0;3>j;j=j+1)
+    {
+        write j;
+    };
+
+    for (k=0;3>k;k=k+1)
+    {
+        write k;
+    };
+};
