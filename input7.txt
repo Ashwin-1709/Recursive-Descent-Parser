@@ -1,3 +1,8 @@
-int x;
-x = 10 == 25 / 5 * 2;
-write x;
+int x , y;
+read y;
+for(x = 10 ; x > y ; x = (x - 1) + (x - y) - (1 * (2)))
+{
+    write x;
+    write y;
+    y = y + 2;
+};
