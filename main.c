@@ -50,6 +50,7 @@ void simulateAssignment(Node *root);
 void simulateFor(Node *root);
 void simulateStatement(Node *root);
 void simulateProgram(Node *root);
+void simulateDeclaration(Node* root);
 int get_end(int pos);
 void error(char *msg);
 
@@ -237,18 +238,6 @@ Node *parseVariableList() {
     strcpy(L->val, "L");
 
     if (isVariable(tokens[cur_pos])) {
-        bool exists = false;
-        for (int i = 0; i < var_pos; i++) {
-            if (!strcmp(variables[i], tokens[cur_pos])) {
-                exists = true;
-                break;
-            }
-        }
-        if (!exists) {
-            variables[var_pos] = tokens[cur_pos];
-            variable_values[var_pos] = 0;
-            var_pos++;
-        } 
         addChild(L, parseVariable());
     } else {
         error("Not a variable.");
@@ -691,17 +680,37 @@ void simulateStatement(Node *root) {
             simulateAssignment(c);
         else if (strcmp(c->val, "F") == 0) {
             simulateFor(c);
+        } else if(strcmp(c->val , "D") == 0) {
+            // D -> int L , pass L into simulator func
+            simulateDeclaration(c->child[1]);
         }
     }
 }
 
 void simulateProgram(Node *root) {
-    if(root->child_cnt == 1)
-        simulateStatement(root->child[0]);
-    else if ((root->child_cnt) == 2)
-        simulateStatement(root->child[0]);
-    else
-        simulateStatement(root->child[2]);
+    simulateStatement(root);
+}
+
+void simulateDeclaration(Node* root) {
+    Node* var = root->child[0]->child[0];
+    if(isVariable(var->val)) {
+        bool exists = false;
+        for (int i = 0; i < var_pos; i++) {
+            if (!strcmp(variables[i], var->val)) {
+                exists = true;
+                break;
+            }
+        }
+        if (!exists) {
+            variables[var_pos] = var->val;
+            variable_values[var_pos] = 0;
+            var_pos++;
+        } else 
+            error("Variable redeclared");
+    } else 
+        error("Not a legal variable");
+    if(root->child_cnt == 3)
+        simulateDeclaration(root->child[2]);
 }
 
 // Main function
