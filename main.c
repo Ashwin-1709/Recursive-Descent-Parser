@@ -51,6 +51,7 @@ void simulateFor(Node *root);
 void simulateStatement(Node *root);
 void simulateProgram(Node *root);
 int get_end(int pos);
+void error(char *msg);
 
 /**
 Reads the passed input file line by line.
@@ -135,18 +136,23 @@ void addChild(Node *par, Node *ch) {
 int get_end(int pos) {
     int end = pos, bracket = 0;
     while (true) {
+
+        if (end == end_pos) {
+            error("Not a well formed expression");
+        }
+
         if ((strcmp(tokens[end], "(")) == 0)
             bracket++;
         else if ((strcmp(tokens[end], ")")) == 0)
             bracket--;
-        if (bracket < 0 || (strcmp(tokens[end], ";") == 0))
-            return end;
+        if ((bracket < 0) || (strcmp(tokens[end], ";") == 0))
+            return end - 1;
         end++;
     }
-    return end;
 }
-void error() {
-    printf("Error parsing %d\n", cur_pos);
+
+void error(char* msg) {
+    fprintf(stderr,"Error while parsing : %s\n", msg);
     fprintf(stderr, "Error occurred\n");
     exit(EXIT_FAILURE);
 }
@@ -210,11 +216,20 @@ Node *parseTerminal() {
     return t;
 }
 
-Node *parseVariable() {
-    Node *I = createNode();
-    strcpy(I->val, "I");
-    addChild(I, parseTerminal());
-    return I;
+Node *parseVariable() {    
+
+    if (isVariable(tokens[cur_pos]))
+    {
+        Node *I = createNode();
+        strcpy(I->val, "I");
+        addChild(I, parseTerminal());
+        return I;
+    }
+    else
+    {
+        error(strcat(tokens[cur_pos]," is not a variable."));
+        return NULL;
+    }
 }
 
 Node *parseVariableList() {
@@ -236,7 +251,7 @@ Node *parseVariableList() {
         } 
         addChild(L, parseVariable());
     } else {
-        error();
+        error("Not a variable.");
         return NULL;
     }
 
@@ -248,7 +263,7 @@ Node *parseVariableList() {
     } else if (strcmp(tokens[cur_pos], ";") == 0)
         return L;
     else {
-        error();
+        error("Incorrect delimiter in Variable List.");
         return NULL;
     }
 }
@@ -280,10 +295,11 @@ Node *parseProgram() {
 
     if (isDeclaration()) {
         addChild(P, parseDeclaration());
-        if (strcmp(tokens[cur_pos], ";") == 0)
+	
+	if (strcmp(tokens[cur_pos], ";") == 0)
             addChild(P, parseTerminal());
         else {
-            error();
+            error("Incorrect delimiter after declaration");
             return NULL;
         }
     }   
@@ -316,13 +332,13 @@ Node *parseStatement() {
     } else if (strcmp(tokens[cur_pos], "for") == 0) {
         addChild(S, parseForLoop());
     } else {
-        error();
+        error("Not a statement.");
         return NULL;
     }
     if (strcmp(tokens[cur_pos], ";") == 0)
         addChild(S, parseTerminal());
     else {
-        error();
+        error("Missing semicolon.");
         return NULL;
     }
     if (strcmp(tokens[cur_pos], "}") != 0)
@@ -430,7 +446,7 @@ Node *parseT3(int start, int end) {
     } else if (isConstant()) {         // parse number condition
         addChild(T3, parseTerminal()); // Parse number here
     } else {
-        error();
+        error("Not an expression.");
         return NULL;
     }
     return T3;
@@ -441,14 +457,8 @@ Node *parseAssignment() {
     strcpy(A->val, "A");
     addChild(A, parseVariable());
     // printf("here with %s\n" , A->child[0]->child[0]->val);
-    if ((strcmp(tokens[cur_pos], "=") == 0)) {
-        // printf("Parsing %s\n" , tokens[cur_pos]);
-        addChild(A, parseTerminal());
-        addChild(A, parseExpression(cur_pos, get_end(cur_pos)));
-    } else {
-        error();
-        return NULL;
-    }
+    addChild(A, parseTerminal());
+    addChild(A, parseExpression(cur_pos, get_end(cur_pos)));
     return A;
 }
 
@@ -477,38 +487,38 @@ Node *parseForLoop() {
 Node *parseRead() {
     Node *R = createNode();
     strcpy(R->val, "R");
-    if ((strcmp(tokens[cur_pos], "read") == 0)) {
-        addChild(R, parseTerminal());
-        if (isVariable(tokens[cur_pos])) {
-            addChild(R, parseVariable());
-        } else {
-            error();
-            return NULL;
-        }
-    } else {
-        error();
-        return NULL;
-    }
+    addChild(R,parseTerminal());
+    addChild(R,parseVariable());
     return R;
 }
 
 Node *parseWrite() {
     Node *W = createNode();
     strcpy(W->val, "W");
-    if ((strcmp(tokens[cur_pos], "write") == 0)) {
-        addChild(W, parseTerminal());
-        if (isVariable(tokens[cur_pos])) {
+    // if ((strcmp(tokens[cur_pos], "write") == 0)) {
+    //     addChild(W, parseTerminal());
+    //     if (isVariable(tokens[cur_pos])) {
+    //         addChild(W, parseVariable());
+    //     } else if (isConstant()) {
+    //         addChild(W, parseTerminal());
+    //     } else {
+    //         error();
+    //         return NULL;
+    //     }
+    // } else {
+    //     error();
+    //     return NULL;
+    // }
+    addChild(W,parseTerminal());
+
+    if (isVariable(tokens[cur_pos])) {
             addChild(W, parseVariable());
         } else if (isConstant()) {
             addChild(W, parseTerminal());
         } else {
-            error();
+            error("Only a variable or a numeric constant can be written.");
             return NULL;
         }
-    } else {
-        error();
-        return NULL;
-    }
     return W;
 }
 
