@@ -12,5 +12,5 @@ text = text.replace("]", ")")
 
 
 tree = Tree.fromstring(text)
-tree.pretty_print(unicodelines=True, nodedist=10)   
+tree.pretty_print(unicodelines=True, nodedist=0)   
 

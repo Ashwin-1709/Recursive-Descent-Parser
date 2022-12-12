@@ -42,6 +42,7 @@ Node *parseForLoop();
 Node *parseT1(int start, int end);
 Node *parseT2(int start, int end);
 Node *parseT3(int start, int end);
+Node *parseConstant();
 void simulateRead(Node *root);
 void simulateWrite(Node *root);
 int simulateExpression(Node *root);
@@ -231,6 +232,13 @@ Node *parseVariable() {
         error(strcat(tokens[cur_pos]," is not a variable."));
         return NULL;
     }
+}
+
+Node* parseConstant() {
+    Node* N = createNode();
+    strcpy(N->val , "N");
+    addChild(N , parseTerminal());
+    return N;
 }
 
 Node *parseVariableList() {
@@ -433,7 +441,7 @@ Node *parseT3(int start, int end) {
     } else if (isVariable(tokens[cur_pos])) {
         addChild(T3, parseVariable());
     } else if (isConstant()) {         // parse number condition
-        addChild(T3, parseTerminal()); // Parse number here
+        addChild(T3, parseConstant()); // Parse number here
     } else {
         error("Not an expression.");
         return NULL;
@@ -503,7 +511,7 @@ Node *parseWrite() {
     if (isVariable(tokens[cur_pos])) {
             addChild(W, parseVariable());
         } else if (isConstant()) {
-            addChild(W, parseTerminal());
+            addChild(W, parseConstant());
         } else {
             error("Only a variable or a numeric constant can be written.");
             return NULL;
@@ -556,7 +564,7 @@ void simulateRead(Node *root) {
     }
 
     int cur;
-    printf("Input for %s : ", v);
+    // printf("Input for %s : ", v);
     scanf("%d", &cur);
 
     if (cur < 0) {
@@ -569,10 +577,11 @@ void simulateRead(Node *root) {
 
 void simulateWrite(Node *root) {
     char *v;
-    if (strcmp(root->child[1]->val, "I") == 0)
-        v = root->child[1]->child[0]->val;
-    else
-        v = root->child[1]->val;
+    v = root->child[1]->child[0]->val;
+    // if (strcmp(root->child[1]->val, "I") == 0)
+    //     v = root->child[1]->child[0]->val;
+    // else
+    //     v = root->child[1]->val;
     bool canWrite = true;
     for (int i = 0; i < 50; i++) {
         if (v[i] == 0)
