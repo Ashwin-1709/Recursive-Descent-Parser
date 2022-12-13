@@ -9,6 +9,11 @@
 #define MAX_TOKENS (1000000)
 #define MAX_LINE_LENGTH (1000000)
 
+typedef enum {
+    Parse,
+    Simulate,
+} Error;
+
 char tokens[100000][50];
 char *variables[100000];
 int variable_values[100000];
@@ -53,7 +58,7 @@ void simulateRead(Node *root);
 void simulateStatement(Node *root);
 void simulateWrite(Node *root);
 int get_end(int pos);
-void error(char *msg);
+void error(char *msg, Error e);
 
 /**
 Reads the passed input file line by line.
@@ -139,7 +144,7 @@ int get_end(int pos) {
     int end = pos, bracket = 0;
     while (true) {
         if (end == end_pos) {
-            error("Not a well formed expression");
+            error("Not a well formed expression", Parse);
         }
 
         if ((strcmp(tokens[end], "(")) == 0)
@@ -152,8 +157,9 @@ int get_end(int pos) {
     }
 }
 
-void error(char *msg) {
-    fprintf(stderr, "Error while parsing : %s\n", msg);
+void error(char *msg, Error e) {
+    char *cause = e == Parse ? "parsing" : "simulating";
+    fprintf(stderr, "Error while %s : %s\n", cause, msg);
     fprintf(stderr, "Error occurred\n");
     exit(EXIT_FAILURE);
 }
@@ -225,7 +231,7 @@ Node *parseVariable() {
         addChild(I, parseTerminal());
         return I;
     } else {
-        error(strcat(tokens[cur_pos], " is not a variable."));
+        error(strcat(tokens[cur_pos], " is not a variable."), Parse);
         return NULL;
     }
 }
@@ -244,7 +250,7 @@ Node *parseVariableList() {
     if (isVariable(tokens[cur_pos])) {
         addChild(L, parseVariable());
     } else {
-        error("Not a variable.");
+        error("Not a variable.", Parse);
         return NULL;
     }
 
@@ -256,7 +262,7 @@ Node *parseVariableList() {
     } else if (strcmp(tokens[cur_pos], ";") == 0)
         return L;
     else {
-        error("Incorrect delimiter in Variable List.");
+        error("Incorrect delimiter in Variable List.", Parse);
         return NULL;
     }
 }
@@ -292,7 +298,7 @@ Node *parseProgram() {
         if (strcmp(tokens[cur_pos], ";") == 0)
             addChild(P, parseTerminal());
         else {
-            error("Incorrect delimiter after declaration");
+            error("Incorrect delimiter after declaration", Parse);
             return NULL;
         }
     }
@@ -325,13 +331,13 @@ Node *parseStatement() {
     } else if (strcmp(tokens[cur_pos], "for") == 0) {
         addChild(S, parseForLoop());
     } else {
-        error("Not a statement.");
+        error("Not a statement.", Parse);
         return NULL;
     }
     if (strcmp(tokens[cur_pos], ";") == 0)
         addChild(S, parseTerminal());
     else {
-        error("Missing semicolon.");
+        error("Missing semicolon.", Parse);
         return NULL;
     }
     if (strcmp(tokens[cur_pos], "}") != 0)
@@ -427,7 +433,7 @@ Node *parseT3(int start, int end) {
     } else if (isConstant()) {         // parse number condition
         addChild(T3, parseConstant()); // Parse number here
     } else {
-        error("Not an expression.");
+        error("Not an expression.", Parse);
         return NULL;
     }
     return T3;
@@ -478,7 +484,7 @@ Node *parseWrite() {
     } else if (isConstant()) {
         addChild(W, parseConstant());
     } else {
-        error("Only a variable or a numeric constant can be written.");
+        error("Only a variable or a numeric constant can be written.", Parse);
         return NULL;
     }
     return W;
@@ -662,9 +668,9 @@ void simulateDeclaration(Node *root) {
             variable_values[var_pos] = 0;
             var_pos++;
         } else
-            error("Variable redeclared");
+            error("Variable redeclared", Simulate);
     } else
-        error("Not a legal variable");
+        error("Not a legal variable", Simulate);
     if (root->child_cnt == 3)
         simulateDeclaration(root->child[2]);
 }
@@ -681,6 +687,8 @@ int main(int argc, char **argv) {
 
     cur_pos = 0;
     Node *root = parseProgram();
+    if (!root)
+        error("Empty Program", Parse);
     printTree(root);
     printf("\n");
     simulateProgram(root);
