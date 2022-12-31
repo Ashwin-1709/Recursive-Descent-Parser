@@ -1,6 +1,6 @@
 # TOC-Assignment-2
 
-## Team Members
+**Contributors**
 - [Arkishman Ghosh](https://github.com/ArkiGhosh)
 - [Ashwin Arun](https://github.com/CodeFreak2002)
 - [Ashwin Pugalia](https://github.com/Ashwin-1709)
