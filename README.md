@@ -3,7 +3,7 @@
 ### Problem Statement : 
 ( Refer to ```problem_statement.pdf``` ) </br>
 For a given hypothetical language 'Basic C' with given specifications : 
-1. Create an unambiguous grammar G for basic C with the above features.
+1. Write an unambiguous grammar G for basic C with the above features.
 2. Build a parser for the language and generates the syntax tree for a given program P in basic C.
 3. Simulate program P on the input given by the user (if any) at the run-time.
 
