@@ -1,7 +1,7 @@
 ### Theory of Computation - Assignment 2
 
 ### Problem Statement : 
-( Refer to ```problem_statement.pdf``` ) </br>
+( Refer to [```problem_statement.pdf```](https://raw.githubusercontent.com/SriramB2002/TOC-Assignment-2/main/problem_statement.pdf) ) </br>
 For a given hypothetical language 'Basic C' with given specifications : 
 1. Write an unambiguous grammar G for basic C with the above features.
 2. Build a parser for the language and generates the syntax tree for a given program P in basic C.
