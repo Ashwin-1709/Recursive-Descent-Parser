@@ -1,33 +1,49 @@
-#variable list
-L -> I | I,L
+# Terminals
+## Operators
++, −, ∗, /, =, >, ==, (, )
+## Delimiters
+`;', `,', `{', `}'
+## Keywords
+`for', `write', `read', `int'
+## <variable>
+<variable> = {a - z}+
+## <constant>
+<constant> = {0-9}+
 
-# declarations
+# Variables
+  + P - program (start variable)
+  + S - statement
+  + D - declaration
+  + F - for loop
+  + A - assignment
+  + R - read
+  + W - write
+  + E - expression
+  + T1, T2, T3 - helper variables for expression
+
+# Productions
+## Constant
+N -> <constant>
+## Variable
+I -> <variable>
+## Variable list
+L -> I | I, L
+## Declaration
 D -> int L
-
-#read
+## Read
 R -> read I
-
-#write
+## Write
 W -> write I | write N
-
-#expression
------------------------------
-E -> E + T1 | E - T1 | T1
-T1 -> T1 * T2 | T1 / T2 | T2
-T2 -> T2 > T3 | T2 == T3 | T3
+## Expression
+E -> E > T1 | E == T1 | T1
+T1 -> T1 + T2 | T1 − T2 | T2
+T2 -> T2 ∗ T3 | T2/T3 | T3
 T3 -> (E) | I | N
-------------------------------
-
-#assignment
+## Assignment
 A -> I = E
-
-#for loop
+## Loop
 F -> for(A; E; A){S}
-
-#program
-P -> D;S | S
-
-#statements
-S -> A; | R; | W; | F; | A;S | R;S | W;S | F;S 
- 
-
+## Statement
+S -> A; | R; | W; | F; | A; S | R; S | W; S | F; S
+## Program
+P -> D; | D; S | S
